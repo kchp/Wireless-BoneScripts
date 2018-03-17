@@ -18,11 +18,24 @@ double readTemp()
 	tempFile.close();
 
 	//	Calibrate sensorvalue:
-	temp = (adc_val*1.8)/4095;
-	temp = (temp-0.5)*100;
-	temp_cal = temp+49;
+	temp = adc_val*1.8/4095;
+	temp_cal = temp*100;
 
 	return temp_cal;
+}
+
+void onLED()
+{
+	ofstream LEDFile (LED);
+	LEDFile << 1;
+	LEDFile.close();
+}
+
+void offLED()
+{
+	ofstream LEDFile (LED);
+	LEDFile << 0;
+	LEDFile.close();
 }
 
 void pwmDuty(double tempInput)
@@ -40,15 +53,18 @@ void pwmDuty(double tempInput)
 			ofstream DUTY (PWM_DUTY);
 			DUTY << duty;		//	Duty cycle value
 			DUTY.close();
+			onLED();
 			break;
 		}
 
 		else
 		{
 			sleep(2);	//	Wait until the sensor arrives at desired value
+			offLED();
 			continue;	//	If conditions were not met, skip to the next iteration in the loop
 		}
 		index += 100;
+
 	}
 }
 
