@@ -57,9 +57,14 @@ int main(int argC, char **argV)
 
 	char buffer[256];
 	char msg[100];
-
-	int client_socket = socket(AF_INET, SOCK_STREAM, 0);
 	int bytes;
+
+	int client_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if(client_socket < 0)
+	{
+		printf("Error occured when trying to create socket\n");
+		exit(1);
+	}
 
 	struct sockaddr_in server_address;
 	server_address.sin_family = AF_INET;
@@ -82,8 +87,6 @@ int main(int argC, char **argV)
 
 	for(;;)
 	{
-		fflush(stdout);
-
 		bytes = recv(client_socket, &buffer, sizeof(buffer), 0);	//	Receive the welcome menu
 		if(bytes < 0)
 			printf("Error occured while receiving data from socket\n");
@@ -107,7 +110,7 @@ int main(int argC, char **argV)
 		}
 
 		//	SET TEMP:
-		if( strncmp(msg, "SET TEMP", strlen("SET TEMP")) == 0 )
+		else if( strncmp(msg, "SET TEMP", strlen("SET TEMP")) == 0 )
 		{
 			bytes = recv(client_socket, &buffer, sizeof(buffer), 0);	//	Server asks to enter temperature
 			if(bytes < 0)
@@ -136,6 +139,17 @@ int main(int argC, char **argV)
 			buffer[bytes] = '\0';
 			printf(buffer);
 			exit(0);
+		}
+
+		//	If none of the options were entered
+		else
+		{
+			bytes = recv(client_socket, &buffer, sizeof(buffer), 0);	//	Receive the welcome menu
+			if(bytes < 0)
+				printf("Error occured while receiving data from socket\n");
+			buffer[bytes] = '\0';
+
+			printf(buffer);
 		}
 
 	}
