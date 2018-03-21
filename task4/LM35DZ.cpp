@@ -38,6 +38,22 @@ void offLED()
 	LEDFile.close();
 }
 
+void gpioHeat(int input)
+{
+	ofstream GPIO_FILE (GPIO_PATH);
+	if(input == 1)
+	{
+		GPIO_FILE << 1;	//	Turn on heating
+		onLED();
+	}
+
+	else
+	{
+		GPIO_FILE << 0;	//	Turn off heating
+		offLED();
+	}
+}
+
 void pwmDuty(double tempInput)
 {
 	int index = 0;

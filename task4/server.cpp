@@ -42,7 +42,8 @@ int main(int argC, char **argV)
 		char msg[100];
 		int bytes, getTemp, setTemp, exitTemp;
 		int sock_fd, new_sock_fd, port;
-		double tempValue;
+		//double tempValue;
+		int tempValue;
 
 		socklen_t client_size;
 		char buffer[256];	//	contain all 256 characters
@@ -120,6 +121,7 @@ int main(int argC, char **argV)
 		exit(1);
 	}
 
+	offLED();
 	listen(sock_fd, 5);
 	fprintf(fp, "Server pending...\n");
 
@@ -153,6 +155,7 @@ int main(int argC, char **argV)
 		getTemp = strncmp(buffer, "GET TEMP", strlen("GET TEMP"));
 		setTemp = strncmp(buffer, "SET TEMP", strlen("SET TEMP"));
 
+
 		if(getTemp == 0)	//	Strings not equal
 		{
 			sprintf(msg, "Temperature: %.2f °C\n", temperature);
@@ -161,7 +164,31 @@ int main(int argC, char **argV)
 				fprintf(fp, "Error occured while writing to socket\n");
 		}
 
-		else if(setTemp == 0)	//	Use this condition to receive input value from client
+		else if(setTemp == 0)
+		{
+			sprintf(msg, "Enter state (1 or 0)\n>>");
+			bytes = send(new_sock_fd, msg, strlen(msg), 0);
+			if(bytes < 0)
+				fprintf(fp, "Error occured while writing to socket\n");
+
+			//	Receive value from client:
+			bytes = recv(new_sock_fd, buffer, 255, 0);
+			if(bytes < 0)
+				fprintf(fp, "Error occured while reading from socket\n");
+
+			else
+			{
+				tempValue = atoi(buffer);	//	Store the converted temperature value from client in double variable
+				sprintf(msg, "Input received...'\n");
+				bytes = send(new_sock_fd, msg, strlen(msg), 0);
+				if(bytes < 0)
+					fprintf(fp, "Error occured while writing to socket\n");
+
+				gpioHeat(tempValue);	//	Turn on/off heating
+			}
+		}
+
+		/*else if(setTemp == 0)	//	Use this condition to receive input value from client
 		{
 			sprintf(msg, "Enter temperature:\n>>");
 			bytes = send(new_sock_fd, msg, strlen(msg), 0);
@@ -183,9 +210,9 @@ int main(int argC, char **argV)
 
 				pwmEnable();			//	Enable the pwm pin
 				pwmPeriod();			//	Setup the period of the pwm signal
-				//pwmDuty(tempValue);		//	Calculate the duty cycle to output corresponding power to the desired temperature value
+				pwmDuty(tempValue);		//	Calculate the duty cycle to output corresponding power to the desired temperature value
 			}
-		}
+		}*/
 
 		else if(exitTemp == 0)
 		{
@@ -202,7 +229,7 @@ int main(int argC, char **argV)
 		else
 		{
 			//	If non of the commands were entered, print the options again
-			sprintf(msg, "Options on Beaglebone server:\n'GET TEMP' get temperature value\n'SET TEMP' set temperature\n'EXIT	 ' exit server\n");
+			sprintf(msg, "Please write one of the given inputs!\n");
 			bytes = send(new_sock_fd, msg, strlen(msg), 0);
 			if(bytes < 0)
 				fprintf(fp, "Error occured while writing to socket\n");
