@@ -70,10 +70,10 @@ int main(int argC, char **argV)
 		}
 
 	if( signal(1, terminateHandler) == SIG_ERR )								//	install the SIGHUB signal_handler to terminate program
-		fprintf(stderr, "Could not install handler - SIGHUB: [%d]...\n", 1);
+		fprintf(stderr, "Could not install handler - SIGHUP: [%d]...\n", 1);
 
 	if(signal(14, timerHandler) == SIG_ERR)										//	install the SIGVTALRM signal handler to read temp value after time configs
-		fprintf(stderr, "Could not install handler - SIGVTALRM [%d]...\n", 14);
+		fprintf(stderr, "Could not install handler - SIGALRM [%d]...\n", 14);
 
 	//	Set up Daemon:
 	pid_t process_id = 0;
